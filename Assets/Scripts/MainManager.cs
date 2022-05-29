@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
+
 
 public class MainManager : MonoBehaviour
 {
@@ -11,11 +13,17 @@ public class MainManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text HighScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
     private int m_Points;
-    
+
+    private string PlayerName;
+
+    private string  HighScorePlayerName;
+    private int     HighScore;
+
     private bool m_GameOver = false;
 
     
@@ -36,6 +44,14 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        //PlayerName = Director.PlayerName;
+
+        PlayerName = Director.Instance.PlayerName;
+        HighScore = Director.Instance.highScore;
+        HighScorePlayerName = Director.Instance.highScorePlayerName;
+
+        SetHighScoreText();
     }
 
     private void Update()
@@ -57,6 +73,8 @@ public class MainManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                StoreHighscore();
+
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
@@ -66,11 +84,44 @@ public class MainManager : MonoBehaviour
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+
+        if (m_Points > HighScore)
+        {
+            HighScorePlayerName = PlayerName;
+            HighScore = m_Points;
+            SetHighScoreText();
+        }
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+    }
+
+    private void StoreHighscore()
+    {
+        Director.Instance.highScore = HighScore;
+        Director.Instance.highScorePlayerName = HighScorePlayerName;
+    }
+
+    public void ReturnToMenu()
+    {
+        StoreHighscore();
+
+        SceneManager.LoadScene(0);
+    }
+
+    private void SetHighScoreText()
+    {
+        //if (!HighScorePlayerName.Equals(string.Empty))
+        if (HighScore > 0)
+        {
+            HighScoreText.text = "High Score: " + HighScorePlayerName + " : " + HighScore;
+        }
+        else
+        {
+            HighScoreText.text = "High Score: N/A";
+        }
     }
 }
